@@ -1,22 +1,60 @@
-export default () => {
-  const header = document.querySelector('.header');
-  header.classList.add('container');
-
-  const divEl = document.createElement('div');
-  const h1El = document.createElement('h1');
-  h1El.textContent = 'RSS агрегатор';
-
-  const formEl = document.createElement('form');
-  const textInput = document.createElement('input');
-  textInput.setAttribute('type', 'text');
-  textInput.setAttribute('name', 'link');
-  textInput.setAttribute('value', 'Add link');
-  const formButton = document.createElement('input');
-  formButton.setAttribute('type', 'submit');
-  formButton.setAttribute('name', 'submit');
-  formButton.setAttribute('value', 'Send');
-  formButton.classList.add('btn', 'btn-info');
-  formEl.append(textInput, formButton);
-  divEl.append(h1El, formEl);
-  header.append(divEl);
+/* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
+const text = {
+  alarm: 'Ссылка должна быть валидным URL',
+  success: 'RSS успешно загружен',
+  already: 'RSS уже существует',
 };
+
+const handleProcessState = (elements, processState) => {
+  switch (processState) {
+    case 'sent':
+      console.log('Sent!');
+      break;
+    case 'error':
+      elements.submitButton.disabled = false;
+      break;
+    case 'sending':
+      elements.submitButton.disabled = true;
+      console.log('Sending!!!!');
+      break;
+    case 'filling':
+      elements.submitButton.disabled = false;
+      break;
+    default:
+      throw new Error(`Unknown process state: ${processState}`);
+  }
+};
+
+const handleProcessError = () => {
+  // вывести сообщение о сетевой ошибке
+};
+
+const renderError = (elements, error) => {
+  const alarmEl = elements.alarm;
+  alarmEl.classList.remove('text-success');
+  alarmEl.classList.add('text-danger');
+  console.log(error === '');
+  alarmEl.innerHTML = error === '' ? '' : text.alarm;
+};
+
+const render = (elements) => (path, value) => {
+  switch (path) {
+    case 'form.processState':
+      handleProcessState(elements, value);
+      break;
+    case 'form.processError':
+      handleProcessError();
+      break;
+    case 'form.valid':
+      elements.submitButton.disabled = !value;
+      break;
+    case 'form.fields.validError':
+      renderError(elements, value);
+      break;
+    default:
+      break;
+  }
+};
+
+export default render;
